@@ -188,7 +188,7 @@ export default function TabLayout() {
           <Animated.View style={[styles.subButtonContainer, getButtonStyle(0)]}>
             <TouchableOpacity
               style={[styles.subButton, { backgroundColor: theme.card }]}
-              onPress={() => navigateTo('/(tabs)/create/edit', { draftData: JSON.stringify({ caseSummary: '' }) })}
+              onPress={() => navigateTo('/(tabs)/create/', { initialSlide: '0' })}
             >
               <SymbolView name={{ ios: 'doc.text.fill', android: 'description', web: 'description' }} tintColor={theme.tint} size={24} />
             </TouchableOpacity>
@@ -200,7 +200,7 @@ export default function TabLayout() {
           <Animated.View style={[styles.subButtonContainer, getButtonStyle(1)]}>
             <TouchableOpacity
               style={[styles.subButton, { backgroundColor: theme.card }]}
-              onPress={() => navigateTo('/(tabs)/create/text-entry')}
+              onPress={() => navigateTo('/(tabs)/create/', { initialSlide: '2' })}
             >
               <SymbolView name={{ ios: 'sparkles', android: 'auto_awesome', web: 'auto_awesome' }} tintColor={theme.tint} size={24} />
             </TouchableOpacity>
@@ -212,7 +212,7 @@ export default function TabLayout() {
           <Animated.View style={[styles.subButtonContainer, getButtonStyle(2)]}>
             <TouchableOpacity
               style={[styles.subButton, { backgroundColor: theme.card }]}
-              onPress={() => navigateTo('/(tabs)/create/')}
+              onPress={() => navigateTo('/(tabs)/create/', { initialSlide: '1' })}
             >
               <SymbolView name={{ ios: 'mic.fill', android: 'mic', web: 'mic' }} tintColor={theme.tint} size={24} />
             </TouchableOpacity>

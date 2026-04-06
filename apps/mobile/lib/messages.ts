@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 export type Conversation = {
   id: string;
@@ -29,121 +31,87 @@ export type Message = {
   attachmentName?: string;
 };
 
-const CURRENT_USER_ID = 'me';
-
-const MOCK_CONVERSATIONS: Conversation[] = [
-  {
-    id: 'conv-1',
-    otherUser: {
-      id: 'user-1',
-      name: 'Dr. Sarah Chen',
-      specialization: 'Cardiology',
-      avatarUrl: null,
-    },
-    lastMessage: 'Thanks for sharing that STEMI case — really insightful.',
-    lastMessageAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-    unreadCount: 0,
-  },
-  {
-    id: 'conv-2',
-    otherUser: {
-      id: 'user-2',
-      name: 'Dr. Marcus Thorne',
-      specialization: 'Neurology',
-      avatarUrl: null,
-    },
-    lastMessage: 'Would love your thoughts on a complex migraine workup.',
-    lastMessageAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    unreadCount: 2,
-  },
-];
-
-const MOCK_MESSAGES: Message[] = [
-  {
-    id: 'm-1',
-    conversationId: 'conv-1',
-    senderId: 'user-1',
-    body: 'Hey, saw your case on atypical MI presentation. Really impressive work.',
-    type: 'text',
-    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    status: 'read',
-  },
-  {
-    id: 'm-2',
-    conversationId: 'conv-1',
-    senderId: CURRENT_USER_ID,
-    body: 'Thank you! Happy to share more details if helpful.',
-    type: 'text',
-    createdAt: new Date(Date.now() - 2.8 * 60 * 60 * 1000).toISOString(),
-    status: 'read',
-  },
-  {
-    id: 'm-3',
-    conversationId: 'conv-2',
-    senderId: 'user-2',
-    body: 'I have a 30yo with rapid-onset neuro deficit, normal CT. Echoing your MedLore post.',
-    type: 'text',
-    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    status: 'sent',
-  },
-  {
-    id: 'm-4',
-    conversationId: 'conv-2',
-    senderId: CURRENT_USER_ID,
-    body: 'Happy to chat — can you share any imaging or lab details?',
-    type: 'text',
-    createdAt: new Date(Date.now() - 3.5 * 60 * 60 * 1000).toISOString(),
-    status: 'sent',
-  },
-];
-
 export function useConversations() {
-  // Placeholder for future HTTP API integration (e.g. api.get('/conversations')).
-  const [conversations] = useState<Conversation[]>(MOCK_CONVERSATIONS);
+  const [data, setData] = useState<Conversation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  return {
-    data: conversations,
-    isLoading: false,
-  };
+  const fetchConversations = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await api.get<{ conversations: Conversation[] }>('/conversations');
+      setData(res.data.conversations);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch conversations'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+
+  return { data, isLoading, error, refetch: fetchConversations };
 }
 
 export function useMessages(conversationId: string) {
-  const initialMessages = useMemo(
-    () => MOCK_MESSAGES.filter((m) => m.conversationId === conversationId),
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchMessages = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await api.get<{ messages: Message[] }>(`/conversations/${conversationId}/messages`);
+      setMessages(res.data.messages);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch messages'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [conversationId]);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
+
+  const sendMessage = useCallback(
+    async (payload: {
+      body: string;
+      type?: MessageType;
+      attachmentUrl?: string;
+      attachmentName?: string;
+    }) => {
+      try {
+        const res = await api.post<Message>(`/conversations/${conversationId}/messages`, payload);
+        setMessages((prev) => [...prev, res.data]);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to send message'));
+      }
+    },
     [conversationId],
   );
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-
-  const sendMessage = (payload: {
-    body: string;
-    type?: MessageType;
-    attachmentUrl?: string;
-    attachmentName?: string;
-  }) => {
-    const now = new Date().toISOString();
-    const message: Message = {
-      id: `local-${now}`,
-      conversationId,
-      senderId: CURRENT_USER_ID,
-      body: payload.body,
-      type: payload.type ?? 'text',
-      createdAt: now,
-      status: 'sent',
-      attachmentUrl: payload.attachmentUrl,
-      attachmentName: payload.attachmentName,
-    };
-
-    setMessages((prev) => [...prev, message]);
-
-    // Placeholder for future HTTP API call:
-    // await api.post('/messages', { conversationId, ...payload });
-  };
+  const markAsRead = useCallback(async () => {
+    try {
+      await api.post(`/conversations/${conversationId}/read`);
+    } catch {
+      // non-critical, ignore silently
+    }
+  }, [conversationId]);
 
   return {
     messages,
+    isLoading,
+    error,
     sendMessage,
-    currentUserId: CURRENT_USER_ID,
+    currentUserId: user?.id ?? '',
+    markAsRead,
+    refetch: fetchMessages,
   };
 }
 
@@ -161,4 +129,3 @@ export function formatTimeAgo(dateString: string) {
   if (diffMin > 0) return `${diffMin}m ago`;
   return 'Just now';
 }
-

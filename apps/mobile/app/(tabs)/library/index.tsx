@@ -2,9 +2,9 @@ import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { formatTimeAgo, useConversations } from '@/lib/messages';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, Platform, StyleSheet, TouchableOpacity, View as RNView } from 'react-native';
 
 export default function InboxScreen() {
@@ -12,8 +12,14 @@ export default function InboxScreen() {
   const theme = Colors[colorScheme];
   const router = useRouter();
 
-  const { data: conversations, isLoading } = useConversations();
+  const { data: conversations, isLoading, refetch } = useConversations();
   const items = conversations ?? [];
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   return (
     <View style={styles.container}>

@@ -2,10 +2,10 @@ import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { Message, formatTimeAgo, useConversations, useMessages } from '@/lib/messages';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import * as DocumentPicker from 'expo-document-picker';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -26,8 +26,18 @@ export default function ConversationScreen() {
   const { data: conversations } = useConversations();
   const conversation = conversations?.find((c) => c.id === conversationId);
 
-  const { messages, sendMessage, currentUserId } = useMessages(conversationId);
+  const { messages, sendMessage, currentUserId, markAsRead, refetch } = useMessages(conversationId);
   const [text, setText] = useState('');
+
+  useEffect(() => {
+    markAsRead();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const sortedMessages = useMemo(
     () => [...messages].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
@@ -53,24 +63,20 @@ export default function ConversationScreen() {
       const result = await DocumentPicker.getDocumentAsync({
         type: '*/*',
         copyToCacheDirectory: true,
-        multiple: false,
       });
 
-      // Expo SDK 55 returns `{ canceled, assets }`
-      if ('canceled' in result && result.canceled) {
-        return;
-      }
+      // Support both old (`type`) and new (`canceled`) result shapes
+      if ('type' in result && result.type === 'cancel') return;
+      if ('canceled' in result && result.canceled) return;
 
-      const asset = 'assets' in result && Array.isArray(result.assets) ? result.assets[0] : (result as any);
-      if (!asset) return;
+      // Normalise fields
+      const name = 'assets' in result && result.assets?.[0]?.name
+        ? result.assets[0].name
+        : (result as any).name ?? 'Attachment';
+      const uri = 'assets' in result && result.assets?.[0]?.uri
+        ? result.assets[0].uri
+        : (result as any).uri;
 
-      // Older API shape guard
-      if ('type' in asset && asset.type === 'cancel') {
-        return;
-      }
-
-      const name: string = asset.name ?? 'Attachment';
-      const uri: string = asset.uri;
       if (!uri) return;
 
       const isImage = /\.(jpe?g|png|gif|webp)$/i.test(name);

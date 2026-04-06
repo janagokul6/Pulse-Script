@@ -2,6 +2,7 @@ import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import api from '@/lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useEffect, useState } from 'react';
@@ -26,6 +27,7 @@ type Draft = {
 export default function ReviewScreen() {
     const router = useRouter();
     const searchParams = useLocalSearchParams();
+    const queryClient = useQueryClient();
     const colorScheme = useColorScheme();
     const theme = Colors[colorScheme];
 
@@ -34,16 +36,13 @@ export default function ReviewScreen() {
 
     useEffect(() => {
         if (searchParams.draftData) {
-            try {
-                setDraft(JSON.parse(searchParams.draftData as string));
-            } catch (e) {
-                console.error("Failed to parse draft data");
-            }
+            try { setDraft(JSON.parse(searchParams.draftData as string)); }
+            catch { console.error('Failed to parse draft data'); }
         }
     }, [searchParams.draftData]);
 
     const handlePublish = async () => {
-        if (!draft || !draft.caseSummary.trim()) {
+        if (!draft?.caseSummary.trim()) {
             Alert.alert('Required', 'Case summary is required.');
             return;
         }
@@ -57,9 +56,8 @@ export default function ReviewScreen() {
                 specialty: draft.specialty.trim() || undefined,
                 tags: draft.tags,
             });
-            // Route back to the home feed index and reset the stack
+            queryClient.invalidateQueries({ queryKey: ['feed'] });
             router.replace('/(tabs)');
-
         } catch (e: unknown) {
             const err = e as { response?: { data?: { error?: string } } };
             Alert.alert('Error', err.response?.data?.error || 'Failed to publish case.');
@@ -71,187 +69,167 @@ export default function ReviewScreen() {
     if (!draft) return null;
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ScrollView
+            style={[styles.container, { backgroundColor: theme.background }]}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
+        >
             <View style={styles.header}>
-                <SymbolView name={{ ios: 'checkmark.shield.fill', android: 'verified_user', web: 'verified_user' }} tintColor={theme.tint} size={36} />
+                <RNView style={[styles.iconBadge, { backgroundColor: theme.tint + '12' }]}>
+                    <SymbolView name={{ ios: 'checkmark.shield.fill', android: 'verified_user', web: 'verified_user' }} tintColor={theme.tint} size={30} />
+                </RNView>
                 <Text style={[styles.title, { color: theme.text }]}>Ready to Publish</Text>
                 <Text style={[styles.subtitle, { color: theme.secondary }]}>
-                    Review your final clinical record below. Publishing will make this case available to the MedLore community.
+                    Review your clinical record before sharing with the community.
                 </Text>
             </View>
 
-            <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                {draft.specialty ? (
-                    <View style={styles.tagsRow}>
-                        <View style={[styles.tag, { backgroundColor: theme.tint + '15' }]}>
-                            <Text style={[styles.tagText, { color: theme.tint }]}>{draft.specialty}</Text>
-                        </View>
-                    </View>
-                ) : null}
+            <RNView style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                {(draft.specialty || draft.tags.length > 0) && (
+                    <RNView style={styles.metaRow}>
+                        {draft.specialty ? (
+                            <RNView style={[styles.badge, { backgroundColor: theme.tint + '15' }]}>
+                                <Text style={[styles.badgeText, { color: theme.tint }]}>{draft.specialty}</Text>
+                            </RNView>
+                        ) : null}
+                        {draft.tags.map(tag => (
+                            <RNView key={tag} style={[styles.badge, { backgroundColor: theme.border }]}>
+                                <Text style={[styles.badgeText, { color: theme.secondary }]}>{tag}</Text>
+                            </RNView>
+                        ))}
+                    </RNView>
+                )}
 
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.text }]}>Clinical Presentation</Text>
+                <RNView style={styles.section}>
+                    <Text style={[styles.sectionLabel, { color: theme.secondary }]}>Clinical Presentation</Text>
                     <Text style={[styles.body, { color: theme.text }]}>{draft.caseSummary}</Text>
-                </View>
+                </RNView>
 
-                {draft.clinicalDecisions ? (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Clinical Decisions</Text>
-                        <RNView style={[styles.cardSection, { backgroundColor: theme.background, borderColor: theme.border }]}>
-                            <Text style={[styles.body, { color: theme.text, marginBottom: 0 }]}>{draft.clinicalDecisions}</Text>
+                {!!draft.clinicalDecisions && (
+                    <RNView style={[styles.section, styles.sectionDivider, { borderTopColor: theme.border }]}>
+                        <Text style={[styles.sectionLabel, { color: theme.secondary }]}>Clinical Decisions</Text>
+                        <RNView style={[styles.insetCard, { backgroundColor: theme.background, borderColor: theme.border }]}>
+                            <Text style={[styles.body, { color: theme.text }]}>{draft.clinicalDecisions}</Text>
                         </RNView>
-                    </View>
-                ) : null}
+                    </RNView>
+                )}
 
-                {draft.outcome ? (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Outcome</Text>
+                {!!draft.outcome && (
+                    <RNView style={[styles.section, styles.sectionDivider, { borderTopColor: theme.border }]}>
+                        <Text style={[styles.sectionLabel, { color: theme.secondary }]}>Outcome</Text>
                         <Text style={[styles.body, { color: theme.text }]}>{draft.outcome}</Text>
-                    </View>
-                ) : null}
+                    </RNView>
+                )}
 
-                {draft.keyLessons ? (
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Key Lessons</Text>
-                        <RNView style={[styles.lessonsCard, { backgroundColor: theme.tint + '10', borderLeftColor: theme.tint }]}>
-                            <Text style={[styles.body, { color: theme.text, marginBottom: 0 }]}>{draft.keyLessons}</Text>
+                {!!draft.keyLessons && (
+                    <RNView style={[styles.section, styles.sectionDivider, { borderTopColor: theme.border }]}>
+                        <Text style={[styles.sectionLabel, { color: theme.secondary }]}>Key Lessons</Text>
+                        <RNView style={[styles.lessonsCard, { backgroundColor: theme.tint + '0d', borderLeftColor: theme.tint }]}>
+                            <Text style={[styles.body, { color: theme.text }]}>{draft.keyLessons}</Text>
                         </RNView>
-                    </View>
-                ) : null}
-            </View>
+                    </RNView>
+                )}
+            </RNView>
 
-            <View style={styles.actionRow}>
+            <RNView style={styles.actions}>
                 <TouchableOpacity
-                    style={[styles.publishButton, { backgroundColor: theme.tint }, saving && styles.buttonDisabled]}
+                    style={[styles.publishBtn, { backgroundColor: theme.tint }, saving && styles.disabled]}
                     onPress={handlePublish}
                     disabled={saving}
+                    activeOpacity={0.85}
                 >
                     {saving ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.publishText}>Publish Case</Text>
+                        <>
+                            <SymbolView name={{ ios: 'paperplane.fill', android: 'send', web: 'send' }} tintColor="#fff" size={18} />
+                            <Text style={styles.publishBtnText}>Publish Case</Text>
+                        </>
                     )}
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.backButton, { borderColor: theme.border }]}
+                    style={[styles.editBtn, { borderColor: theme.border }]}
                     onPress={() => router.back()}
                     disabled={saving}
                 >
-                    <Text style={[styles.backText, { color: theme.text }]}>Edit Fields</Text>
+                    <Text style={[styles.editBtnText, { color: theme.text }]}>Edit Fields</Text>
                 </TouchableOpacity>
-            </View>
+            </RNView>
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    content: {
-        padding: 24,
-        paddingBottom: 40,
-    },
-    header: {
-        marginBottom: 32,
+    container: { flex: 1 },
+    content: { padding: 24, paddingBottom: 48 },
+    header: { alignItems: 'center', marginBottom: 28 },
+    iconBadge: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 16,
+        marginBottom: 14,
     },
-    title: {
-        fontSize: 26,
-        fontWeight: '800',
-        marginTop: 16,
-        marginBottom: 12,
-    },
-    subtitle: {
-        fontSize: 15,
-        lineHeight: 22,
-        textAlign: 'center',
-        paddingHorizontal: 16,
-    },
+    title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.4, marginBottom: 8 },
+    subtitle: { fontSize: 14, lineHeight: 20, textAlign: 'center', paddingHorizontal: 16 },
     card: {
         borderRadius: 16,
         borderWidth: 1,
         padding: 20,
-        marginBottom: 32,
+        marginBottom: 28,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 3,
     },
-    tagsRow: {
-        flexDirection: 'row',
-        marginBottom: 20,
-    },
-    tag: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-    },
-    tagText: {
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 16,
+    metaRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 18 },
+    badge: { paddingHorizontal: 11, paddingVertical: 5, borderRadius: 14 },
+    badgeText: { fontSize: 12, fontWeight: '600' },
+    section: { paddingVertical: 2 },
+    sectionDivider: { borderTopWidth: 1, marginTop: 16, paddingTop: 16 },
+    sectionLabel: {
+        fontSize: 11,
         fontWeight: '700',
-        marginBottom: 8,
         textTransform: 'uppercase',
-        letterSpacing: 0.5,
+        letterSpacing: 0.6,
+        marginBottom: 8,
     },
-    body: {
-        fontSize: 16,
-        lineHeight: 24,
-        marginBottom: 4,
-    },
-    cardSection: {
-        padding: 16,
-        borderRadius: 12,
+    body: { fontSize: 15, lineHeight: 23 },
+    insetCard: {
+        padding: 14,
+        borderRadius: 10,
         borderWidth: 1,
-        marginTop: 4,
     },
     lessonsCard: {
-        padding: 16,
-        borderRadius: 12,
-        borderLeftWidth: 4,
-        marginTop: 4,
+        padding: 14,
+        borderRadius: 10,
+        borderLeftWidth: 3,
     },
-    actionRow: {
-        gap: 16,
-    },
-    publishButton: {
-        paddingVertical: 16,
+    actions: { gap: 12 },
+    publishBtn: {
+        flexDirection: 'row',
+        paddingVertical: 15,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        shadowColor: '#000',
+        gap: 8,
+        shadowColor: '#1a355b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,
         elevation: 5,
     },
-    publishText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: '700',
-    },
-    backButton: {
-        paddingVertical: 16,
+    publishBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    editBtn: {
+        paddingVertical: 14,
         borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,
     },
-    backText: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    buttonDisabled: {
-        opacity: 0.7,
-    },
+    editBtnText: { fontSize: 15, fontWeight: '600' },
+    disabled: { opacity: 0.65 },
 });

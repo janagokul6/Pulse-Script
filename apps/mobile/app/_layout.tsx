@@ -41,7 +41,9 @@ export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = { initialRouteName: '(tabs)' };
 
-SplashScreen.preventAutoHideAsync();
+if (Platform.OS !== 'web') {
+  SplashScreen.preventAutoHideAsync();
+}
 
 const queryClient = new QueryClient();
 
@@ -50,7 +52,7 @@ if (!envKey) throw new Error('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY');
 const publishableKey: string = envKey;
 
 /** Set to true to temporarily skip auth redirects and browse the UI without signing in */
-const SKIP_AUTH_GUARD = true;
+const SKIP_AUTH_GUARD = false;
 
 function AuthGuard() {
   const { isLoaded, isSignedIn } = useClerkAuth();
@@ -71,16 +73,20 @@ function AuthGuard() {
 }
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [loaded, error] = useFonts(
+    Platform.OS === 'web'
+      ? {}
+      : {
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+      }
+  );
 
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync();
+    if (Platform.OS !== 'web' && loaded) SplashScreen.hideAsync();
   }, [loaded]);
 
   if (!loaded) return null;

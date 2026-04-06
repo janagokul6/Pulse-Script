@@ -27,46 +27,104 @@ declare module '@clerk/expo' {
 
   export function useAuth(options?: unknown): UseAuthReturn;
 
+  type ClerkError = { code?: string; message?: string; errors?: Array<{ code?: string; message?: string }> };
+
+  export type SignInStatus = 'needs_identifier' | 'needs_first_factor' | 'needs_second_factor' | 'needs_client_trust' | 'needs_new_password' | 'complete';
+
   export interface SignInFuture {
-    status: string;
-    reset: () => void;
-    password: (params: { emailAddress: string; password: string }) => Promise<{ error?: unknown }>;
-    finalize: (params: { navigate: (opts: { decorateUrl: (path: string) => string }) => void }) => Promise<{ error?: unknown }>;
-    supportedSecondFactors?: Array<{ strategy: string }>;
+    readonly status: SignInStatus;
+    readonly identifier: string | null;
+    readonly supportedFirstFactors: Array<{ strategy: string }>;
+    readonly supportedSecondFactors: Array<{ strategy: string }>;
+    create: (params: { identifier?: string; strategy?: string; transfer?: boolean }) => Promise<{ error: ClerkError | null }>;
+    password: (params: { password: string } & ({ identifier: string } | { emailAddress: string } | { phoneNumber: string } | {})) => Promise<{ error: ClerkError | null }>;
+    emailCode: {
+      sendCode: (params?: { emailAddress?: string; emailAddressId?: string }) => Promise<{ error: ClerkError | null }>;
+      verifyCode: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
+    };
     mfa: {
-      sendEmailCode: () => Promise<unknown>;
-      verifyEmailCode: (params: { code: string }) => Promise<unknown>;
+      sendEmailCode: () => Promise<{ error: ClerkError | null }>;
+      verifyEmailCode: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
+      sendPhoneCode: () => Promise<{ error: ClerkError | null }>;
+      verifyPhoneCode: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
+      verifyTOTP: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
     };
-    create: (params: { identifier: string }) => Promise<{ error?: unknown }>;
-    resetPasswordEmailCode?: {
-      sendCode: () => Promise<{ error?: unknown }>;
-      verifyCode: (params: { code: string }) => Promise<{ error?: unknown }>;
-      submitPassword: (params: { password: string }) => Promise<{ error?: unknown }>;
-    };
+    finalize: (params?: { navigate?: (params: { session: unknown; decorateUrl: (url: string) => string }) => void | Promise<unknown> }) => Promise<{ error: ClerkError | null }>;
+    reset: () => void;
   }
 
-  export interface Errors {
-    fields?: Record<string, { message: string }>;
+  export interface FieldError {
+    message: string;
+  }
+
+  export interface SignInErrors {
+    fields?: { identifier?: FieldError | null; password?: FieldError | null; code?: FieldError | null } | null;
+    global?: Array<{ message: string }> | null;
+  }
+
+  export interface SignUpErrors {
+    fields?: { emailAddress?: FieldError | null; password?: FieldError | null; code?: FieldError | null; username?: FieldError | null; captcha?: FieldError | null } | null;
+    global?: Array<{ message: string }> | null;
   }
 
   export function useSignIn(): {
     signIn: SignInFuture | null;
-    errors: Errors;
+    errors: SignInErrors;
     fetchStatus: 'idle' | 'fetching';
   };
 
+  export type SignUpStatus = 'missing_requirements' | 'complete' | 'abandoned';
+
   export interface SignUpFuture {
-    status: string;
-    unverifiedFields: string[];
-    missingFields: string[];
-    password: (params: { emailAddress: string; password: string }) => Promise<{ error?: unknown }>;
-    verifications: { sendEmailCode: () => Promise<unknown>; verifyEmailCode: (params: { code: string }) => Promise<unknown> };
-    finalize: (params: { navigate: (opts: { decorateUrl: (path: string) => string }) => void }) => Promise<{ error?: unknown }>;
+    readonly status: SignUpStatus;
+    readonly unverifiedFields: string[];
+    readonly missingFields: string[];
+    readonly emailAddress: string | null;
+    create: (params: { emailAddress?: string; phoneNumber?: string; username?: string; transfer?: boolean }) => Promise<{ error: ClerkError | null }>;
+    password: (params: { password: string; emailAddress?: string; phoneNumber?: string; username?: string }) => Promise<{ error: ClerkError | null }>;
+    verifications: {
+      sendEmailCode: () => Promise<{ error: ClerkError | null }>;
+      verifyEmailCode: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
+      sendPhoneCode: () => Promise<{ error: ClerkError | null }>;
+      verifyPhoneCode: (params: { code: string }) => Promise<{ error: ClerkError | null }>;
+    };
+    finalize: (params?: { navigate?: (params: { session: unknown; decorateUrl: (url: string) => string }) => void | Promise<unknown> }) => Promise<{ error: ClerkError | null }>;
+    reset: () => Promise<{ error: ClerkError | null }>;
   }
 
   export function useSignUp(): {
     signUp: SignUpFuture | null;
-    errors: Errors;
+    errors: SignUpErrors;
     fetchStatus: 'idle' | 'fetching';
+  };
+
+  export function useOAuth(params: { strategy: string }): {
+    startOAuthFlow: () => Promise<{ createdSessionId: string | null; setActive: ((params: { session: string }) => Promise<void>) | null }>;
+  };
+
+  export function useSSO(): {
+    startSSOFlow: (params: { strategy: string }) => Promise<{
+      createdSessionId: string | null;
+      setActive?: (params: { session: string }) => Promise<void>;
+      authSessionResult?: { type: string } | null;
+    }>;
+  };
+}
+
+declare module '@clerk/expo/google' {
+  export function useSignInWithGoogle(): {
+    startGoogleAuthenticationFlow: (params?: { unsafeMetadata?: Record<string, unknown> }) => Promise<{
+      createdSessionId: string | null;
+      setActive?: (params: { session: string }) => Promise<void>;
+    }>;
+  };
+}
+
+declare module '@clerk/expo/apple' {
+  export function useSignInWithApple(): {
+    startAppleAuthenticationFlow: (params?: { unsafeMetadata?: Record<string, unknown> }) => Promise<{
+      createdSessionId: string | null;
+      setActive?: (params: { session: string }) => Promise<void>;
+    }>;
   };
 }

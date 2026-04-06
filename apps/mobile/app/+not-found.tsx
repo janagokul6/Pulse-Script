@@ -25,7 +25,7 @@ export default function NotFoundScreen() {
         </Text>
 
         <Link href="/(tabs)" asChild>
-          <TouchableOpacity style={[styles.button, { backgroundColor: theme.tint }]}>
+          <TouchableOpacity style={StyleSheet.flatten([styles.button, { backgroundColor: theme.tint }])}>
             <Text style={styles.buttonText}>Return to Dashboard</Text>
           </TouchableOpacity>
         </Link>

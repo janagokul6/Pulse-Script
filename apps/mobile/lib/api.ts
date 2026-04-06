@@ -25,7 +25,8 @@ api.interceptors.response.use(
   (res) => res,
   async (err: AxiosError) => {
     if (err.response?.status === 401) {
-      const message = (err.response?.data as { error?: string })?.error || 'Session expired. Please sign in again.';
+      const data = err.response?.data as { error?: unknown } | undefined;
+      const message = typeof data?.error === 'string' ? data.error : 'Session expired. Please sign in again.';
       err.message = message;
     }
     return Promise.reject(err);

@@ -18,6 +18,7 @@ export type Post = {
     createdAt: string;
     author: { id: string; name: string; specialization: string | null; avatarUrl: string | null };
     imageUrl?: string;
+    commentCount?: number;
     stats?: { comments: number; shares: number; saves: number; isSaved?: boolean };
     badge?: string;
     iconName?: string;
@@ -102,7 +103,7 @@ export function PostCard({ post }: { post: Post }) {
                     <View style={styles.footerLeft}>
                         <TouchableOpacity style={styles.actionBtn}>
                             <SymbolView name={{ ios: 'text.bubble.fill', android: 'chat_bubble', web: 'chat_bubble' }} tintColor={theme.secondary} size={20} />
-                            <Text style={[styles.actionText, { color: theme.text }]}>{post.stats?.comments || Math.floor(Math.random() * 20) + 1}</Text>
+                            <Text style={[styles.actionText, { color: theme.text }]}>{post.stats?.comments ?? post.commentCount ?? 0}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.actionBtn}>
                             <SymbolView name={{ ios: 'arrowshape.turn.up.right.fill', android: 'share', web: 'share' }} tintColor={theme.secondary} size={20} />

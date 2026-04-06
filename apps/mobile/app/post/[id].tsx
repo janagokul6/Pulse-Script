@@ -1,12 +1,13 @@
 import { SkeletonLoader } from '@/components/SkeletonLoader';
 import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
+import CommentsBottomSheet from '@/components/comments/CommentsBottomSheet';
 import Colors from '@/constants/Colors';
 import api from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, Platform, View as RNView, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +22,7 @@ type Post = {
   tags: string[];
   createdAt: string;
   bookmarked?: boolean;
+  commentCount?: number;
   author: { id: string; name: string; specialization: string | null; avatarUrl: string | null };
   imageUrl?: string;
   views?: number;
@@ -44,6 +46,7 @@ export default function PostDetailScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
+  const [commentsVisible, setCommentsVisible] = useState(false);
 
   const { data: fetchedPost, isLoading, error } = useQuery({
     queryKey: ['post', id],
@@ -236,13 +239,23 @@ export default function PostDetailScreen() {
           <SymbolView name={{ ios: 'person.badge.plus', android: 'person_add', web: 'person_add' }} tintColor="#fff" size={20} />
           <Text style={styles.followBtnText}>Follow Doctor</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]}>
+        <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]} onPress={() => setCommentsVisible(true)}>
           <SymbolView name={{ ios: 'bubble.right', android: 'chat_bubble', web: 'chat_bubble' }} tintColor={theme.tint} size={22} />
+          {(post.commentCount ?? 0) > 0 && (
+            <Text style={[styles.footerActionCount, { color: theme.tint }]}>{post.commentCount}</Text>
+          )}
         </TouchableOpacity>
         <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]}>
           <SymbolView name={{ ios: 'arrowshape.turn.up.right', android: 'share', web: 'share' }} tintColor={theme.tint} size={22} />
         </TouchableOpacity>
       </RNView>
+
+      <CommentsBottomSheet
+        postId={post.id}
+        visible={commentsVisible}
+        onClose={() => setCommentsVisible(false)}
+        autoFocusInput={true}
+      />
 
     </RNView>
   );
@@ -416,6 +429,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+  },
+  footerActionCount: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 2,
   },
 });
 

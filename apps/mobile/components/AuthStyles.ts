@@ -45,6 +45,13 @@ export function useAuthStyles() {
         fontSize: 16,
         backgroundColor: inputBg,
       },
+      otpInput: {
+        letterSpacing: 8,
+        textAlign: 'center',
+        fontSize: 20,
+        marginTop: 8,
+        marginBottom: 20,
+      },
       button: {
         backgroundColor: tint,
         paddingVertical: 14,

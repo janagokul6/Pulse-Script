@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useState } from 'react';
-import { Image, View as RNView, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Alert, Image, View as RNView, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const PUBLISHED_CASES = [
@@ -50,6 +50,13 @@ export default function ProfileScreen() {
 
   const [activeTab, setActiveTab] = useState('Library');
 
+  const confirmLogout = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Sign Out', style: 'destructive', onPress: () => logout() },
+    ]);
+  };
+
   const avatarUrl = (user as any)?.avatarUrl || (user as any)?.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuBL1Rnx5XoM4wF_gvNeEAKSHRXpbvLE9jZE_rdzztNd92-BRuzQg495a565d7kw8oB_Is4VSsYvAX8eMf7z0DWVwsdLqktI1eKrUe--9jjLqXBQ_tLftZfMUm4DCDASyFVLotHDndg9REdwgFW-h6vYereLyqIHsRJ-mJcU2AmUg3xIVOfAg7yKOxMF-aCZcfQT6PSj1PQhKzVbQD4L1NdNK1It5hJEFa3pXKXWvixD2yNwHnGZe3QTrA0lb5u7Z84T8qWpZKplCZA';
 
   return (
@@ -64,7 +71,7 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.headerIcon}>
             <SymbolView name={{ ios: 'square.and.arrow.up', android: 'share', web: 'share' }} tintColor={theme.tint} size={22} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => logout()} style={[styles.headerIcon, { marginLeft: 8 }]}>
+          <TouchableOpacity onPress={confirmLogout} style={[styles.headerIcon, { marginLeft: 8 }]}>
             <SymbolView name={{ ios: 'rectangle.portrait.and.arrow.right', android: 'logout', web: 'logout' }} tintColor="#ef4444" size={22} />
           </TouchableOpacity>
         </RNView>
