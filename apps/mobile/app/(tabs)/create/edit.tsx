@@ -92,7 +92,7 @@ export default function StructuredEditScreen() {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
         >
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <RNView style={styles.header}>
+                {/* <RNView style={styles.header}>
                     <RNView style={[styles.iconBadge, { backgroundColor: theme.tint + '12' }]}>
                         <SymbolView name={{ ios: 'pencil.and.list.clipboard', android: 'edit_note', web: 'edit_note' }} tintColor={theme.tint} size={26} />
                     </RNView>
@@ -106,7 +106,7 @@ export default function StructuredEditScreen() {
                     <Text style={[styles.progressLabel, { color: theme.secondary }]}>
                         {filledCount} of {FIELDS.length} sections filled
                     </Text>
-                </RNView>
+                </RNView> */}
 
                 <RNView style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
                     {FIELDS.map((field, i) => (

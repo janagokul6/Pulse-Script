@@ -2,6 +2,7 @@ import { SkeletonLoader } from '@/components/SkeletonLoader';
 import { Text, View } from '@/components/Themed';
 import { useColorScheme } from '@/components/useColorScheme';
 import CommentsBottomSheet from '@/components/comments/CommentsBottomSheet';
+import ShareBottomSheet from '@/components/share/ShareBottomSheet';
 import Colors from '@/constants/Colors';
 import api from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -47,6 +48,7 @@ export default function PostDetailScreen() {
   const theme = Colors[colorScheme];
   const insets = useSafeAreaInsets();
   const [commentsVisible, setCommentsVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
 
   const { data: fetchedPost, isLoading, error } = useQuery({
     queryKey: ['post', id],
@@ -245,7 +247,7 @@ export default function PostDetailScreen() {
             <Text style={[styles.footerActionCount, { color: theme.tint }]}>{post.commentCount}</Text>
           )}
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]}>
+        <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]} onPress={() => setShareVisible(true)}>
           <SymbolView name={{ ios: 'arrowshape.turn.up.right', android: 'share', web: 'share' }} tintColor={theme.tint} size={22} />
         </TouchableOpacity>
       </RNView>
@@ -255,6 +257,12 @@ export default function PostDetailScreen() {
         visible={commentsVisible}
         onClose={() => setCommentsVisible(false)}
         autoFocusInput={true}
+      />
+
+      <ShareBottomSheet
+        visible={shareVisible}
+        onClose={() => setShareVisible(false)}
+        post={post}
       />
 
     </RNView>

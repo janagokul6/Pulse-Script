@@ -3,7 +3,8 @@ import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import React from 'react';
+import React, { useState } from 'react';
+import ShareBottomSheet from '@/components/share/ShareBottomSheet';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export type Post = {
@@ -46,6 +47,8 @@ export function PostCard({ post }: { post: Post }) {
     const colorScheme = useColorScheme();
     const theme = Colors[colorScheme];
     const router = useRouter();
+
+    const [shareVisible, setShareVisible] = useState(false);
 
     const authorInitial = post.author.name ? post.author.name[0].toUpperCase() : '?';
 
@@ -105,7 +108,7 @@ export function PostCard({ post }: { post: Post }) {
                             <SymbolView name={{ ios: 'text.bubble.fill', android: 'chat_bubble', web: 'chat_bubble' }} tintColor={theme.secondary} size={20} />
                             <Text style={[styles.actionText, { color: theme.text }]}>{post.stats?.comments ?? post.commentCount ?? 0}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.actionBtn}>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => setShareVisible(true)}>
                             <SymbolView name={{ ios: 'arrowshape.turn.up.right.fill', android: 'share', web: 'share' }} tintColor={theme.secondary} size={20} />
                             <Text style={[styles.actionText, { color: theme.text }]}>{post.stats?.shares || Math.floor(Math.random() * 10)}</Text>
                         </TouchableOpacity>
@@ -122,6 +125,12 @@ export function PostCard({ post }: { post: Post }) {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <ShareBottomSheet
+                visible={shareVisible}
+                onClose={() => setShareVisible(false)}
+                post={post}
+            />
         </TouchableOpacity>
     );
 }

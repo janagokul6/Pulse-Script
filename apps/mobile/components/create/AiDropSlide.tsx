@@ -75,7 +75,7 @@ export default function AiDropSlide({ theme }: { theme: Theme }) {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
         >
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <View style={styles.header}>
+                {/* <View style={styles.header}>
                     <RNView style={[styles.iconBadge, { backgroundColor: theme.tint + '12' }]}>
                         <SymbolView name={{ ios: 'doc.text.viewfinder', android: 'document_scanner', web: 'document_scanner' }} tintColor={theme.tint} size={28} />
                     </RNView>
@@ -83,7 +83,7 @@ export default function AiDropSlide({ theme }: { theme: Theme }) {
                     <Text style={[styles.subtitle, { color: theme.secondary }]}>
                         Review or edit the transcribed text. AI will extract structured fields in the next step.
                     </Text>
-                </View>
+                </View> */}
 
                 <RNView style={[styles.inputCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
                     <TextInput

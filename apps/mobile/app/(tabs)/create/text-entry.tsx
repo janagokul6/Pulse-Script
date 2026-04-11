@@ -72,15 +72,15 @@ export default function TextEntryScreen() {
             keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
         >
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <View style={styles.header}>
-                    <RNView style={[styles.iconBadge, { backgroundColor: theme.tint + '12' }]}>
+                {/* <View style={styles.header}> */}
+                    {/* <RNView style={[styles.iconBadge, { backgroundColor: theme.tint + '12' }]}>
                         <SymbolView name={{ ios: 'doc.text.viewfinder', android: 'document_scanner', web: 'document_scanner' }} tintColor={theme.tint} size={28} />
-                    </RNView>
-                    <Text style={[styles.title, { color: theme.text }]}>Your Case Notes</Text>
-                    <Text style={[styles.subtitle, { color: theme.secondary }]}>
+                    </RNView> */}
+                    {/* <Text style={[styles.title, { color: theme.text }]}>Your Case Notes</Text> */}
+                    {/* <Text style={[styles.subtitle, { color: theme.secondary }]}>
                         Review or edit the transcribed text. AI will extract structured fields in the next step.
-                    </Text>
-                </View>
+                    </Text> */}
+                {/* </View> */}
 
                 <RNView style={[styles.inputCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
                     <TextInput
