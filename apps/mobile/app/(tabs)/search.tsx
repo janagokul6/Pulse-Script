@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  list: { padding: 16, paddingBottom: 100 },
+  list: { padding: 16, paddingBottom: 24 },
   emptyContainer: {
     alignItems: 'center',
     paddingTop: 80,

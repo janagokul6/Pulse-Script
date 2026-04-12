@@ -33,6 +33,7 @@ type UserProfile = {
   certifications?: string | null;
   memberships?: string | null;
   languages?: string | null;
+  patientsTreated?: string | null;
 };
 
 // MOCK DATA for posts (in a real app, this would be fetched from /users/:id/posts)
@@ -308,63 +309,75 @@ export default function UserProfileScreen() {
           <RNView
             style={[
               styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
+              { backgroundColor: theme.background, borderColor: theme.border },
             ]}
           >
-            <Text style={styles.statLabel}>SUCCESS</Text>
+            <Text style={styles.statLabel}>EXPERIENCE</Text>
             <RNView style={styles.statValueRow}>
-              <Text style={styles.statValueAccent}>99.4%</Text>
+              <Text style={[styles.statValueDark, { color: theme.text }]}>
+                {profile.experienceYears || "0"}
+              </Text>
+              <Text
+                style={[
+                  styles.statValueDark,
+                  { color: theme.text, fontSize: 14 },
+                ]}
+              >
+                yrs
+              </Text>
+            </RNView>
+            <Text style={[styles.statHelper, { color: theme.secondary }]}>
+              Clinical Practice
+            </Text>
+          </RNView>
+
+          <RNView
+            style={[
+              styles.statBox,
+              { backgroundColor: theme.background, borderColor: theme.border },
+            ]}
+          >
+            <Text style={styles.statLabel}>PATIENTS</Text>
+            <RNView style={styles.statValueRow}>
+              <Text style={[styles.statValueDark, { color: theme.text }]}>
+                {profile.patientsTreated || "500+"}
+              </Text>
               <SymbolView
                 name={{
-                  ios: "medal.fill",
-                  android: "military_tech",
-                  web: "military_tech",
+                  ios: "person.crop.circle.badge.checkmark",
+                  android: "how_to_reg",
+                  web: "how_to_reg",
+                }}
+                tintColor={theme.tint}
+                size={16}
+              />
+            </RNView>
+            <Text style={[styles.statHelper, { color: theme.secondary }]}>
+              Treated
+            </Text>
+          </RNView>
+
+          <RNView
+            style={[
+              styles.statBox,
+              { backgroundColor: theme.background, borderColor: "#d4af3733" },
+            ]}
+          >
+            <Text style={styles.statLabel}>CASES</Text>
+            <RNView style={styles.statValueRow}>
+              <Text style={styles.statValueAccent}>24</Text>
+              <SymbolView
+                name={{
+                  ios: "doc.text.fill",
+                  android: "article",
+                  web: "article",
                 }}
                 tintColor="#d4af37"
-                size={18}
+                size={16}
               />
             </RNView>
             <Text style={[styles.statHelper, { color: theme.tint }]}>
-              +1.2% year-avg
-            </Text>
-          </RNView>
-
-          <RNView
-            style={[
-              styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
-            ]}
-          >
-            <Text style={styles.statLabel}>LECTURES</Text>
-            <RNView style={styles.statValueRow}>
-              <Text style={[styles.statValueDark, { color: theme.text }]}>
-                412
-              </Text>
-            </RNView>
-            <Text style={[styles.statHelper, { color: theme.tint }]}>
-              Top 5% Contributor
-            </Text>
-          </RNView>
-
-          <RNView
-            style={[
-              styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
-            ]}
-          >
-            <Text style={styles.statLabel}>RATING</Text>
-            <RNView style={styles.statValueRow}>
-              <Text style={[styles.statValueDark, { color: theme.text }]}>
-                5.0
-              </Text>
-              <SymbolView
-                name={{ ios: "star.fill", android: "star", web: "star" }}
-                tintColor="#d4af37"
-                size={18}
-              />
-            </RNView>
-            <Text style={[styles.statHelper, { color: theme.tint }]}>
-              Elite Fellow
+              Published
             </Text>
           </RNView>
         </RNView>
@@ -406,7 +419,7 @@ export default function UserProfileScreen() {
         {/* Content Area */}
         {activeTab === "About" ? (
           <RNView
-            style={[styles.aboutContent, { paddingBottom: insets.bottom + 80 }]}
+            style={[styles.aboutContent, { paddingBottom: insets.bottom + 24 }]}
           >
             <RNView style={styles.aboutHeader}>
               <Text style={[styles.aboutTitle, { color: theme.text }]}>
@@ -422,49 +435,119 @@ export default function UserProfileScreen() {
               <RNView style={styles.detailsContainer}>
                 <RNView style={styles.detailRow}>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>Specialization</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.specialization || 'Not specified'}</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      Specialization
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.specialization || "Not specified"}
+                    </Text>
                   </RNView>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>License No.</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.registrationNumber || 'Not specified'}</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      License No.
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.registrationNumber || "Not specified"}
+                    </Text>
                   </RNView>
                 </RNView>
                 <RNView style={styles.detailRow}>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>Experience</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.experienceYears || '0'} years</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      Experience
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.experienceYears || "0"} years
+                    </Text>
                   </RNView>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>Affiliation</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.hospital || 'Not specified'}</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      Affiliation
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.hospital || "Not specified"}
+                    </Text>
                   </RNView>
                 </RNView>
                 <RNView style={styles.detailItem}>
-                  <Text style={[styles.detailLabel, { color: theme.secondary }]}>Education</Text>
-                  <Text style={[styles.detailValue, { color: theme.text }]}>{profile.education || 'Not specified'}</Text>
+                  <Text
+                    style={[styles.detailLabel, { color: theme.secondary }]}
+                  >
+                    Education
+                  </Text>
+                  <Text style={[styles.detailValue, { color: theme.text }]}>
+                    {profile.education || "Not specified"}
+                  </Text>
                 </RNView>
                 <RNView style={styles.detailItem}>
-                  <Text style={[styles.detailLabel, { color: theme.secondary }]}>Research Interests</Text>
-                  <Text style={[styles.detailValue, { color: theme.text }]}>{profile.researchInterests || 'Not specified'}</Text>
+                  <Text
+                    style={[styles.detailLabel, { color: theme.secondary }]}
+                  >
+                    Research Interests
+                  </Text>
+                  <Text style={[styles.detailValue, { color: theme.text }]}>
+                    {profile.researchInterests || "Not specified"}
+                  </Text>
                 </RNView>
                 <RNView style={styles.detailRow}>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>Certifications</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.certifications || 'Not specified'}</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      Certifications
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.certifications || "Not specified"}
+                    </Text>
                   </RNView>
                   <RNView style={[styles.detailItem, { flex: 1 }]}>
-                    <Text style={[styles.detailLabel, { color: theme.secondary }]}>Languages</Text>
-                    <Text style={[styles.detailValue, { color: theme.text }]}>{profile.languages || 'Not specified'}</Text>
+                    <Text
+                      style={[styles.detailLabel, { color: theme.secondary }]}
+                    >
+                      Languages
+                    </Text>
+                    <Text style={[styles.detailValue, { color: theme.text }]}>
+                      {profile.languages || "Not specified"}
+                    </Text>
                   </RNView>
                 </RNView>
                 <RNView style={styles.detailItem}>
-                  <Text style={[styles.detailLabel, { color: theme.secondary }]}>Memberships</Text>
-                  <Text style={[styles.detailValue, { color: theme.text }]}>{profile.memberships || 'Not specified'}</Text>
+                  <Text
+                    style={[styles.detailLabel, { color: theme.secondary }]}
+                  >
+                    Memberships
+                  </Text>
+                  <Text style={[styles.detailValue, { color: theme.text }]}>
+                    {profile.memberships || "Not specified"}
+                  </Text>
                 </RNView>
-                <RNView style={[styles.detailItem, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-                  <Text style={[styles.detailLabel, { color: theme.secondary }]}>Bio</Text>
-                  <Text style={[styles.detailValue, { color: theme.text, lineHeight: 22 }]}>{profile.bio || 'No details provided yet.'}</Text>
+                <RNView
+                  style={[
+                    styles.detailItem,
+                    { borderBottomWidth: 0, paddingBottom: 0 },
+                  ]}
+                >
+                  <Text
+                    style={[styles.detailLabel, { color: theme.secondary }]}
+                  >
+                    Bio
+                  </Text>
+                  <Text
+                    style={[
+                      styles.detailValue,
+                      { color: theme.text, lineHeight: 22 },
+                    ]}
+                  >
+                    {profile.bio || "No details provided yet."}
+                  </Text>
                 </RNView>
               </RNView>
             </RNView>
@@ -473,7 +556,7 @@ export default function UserProfileScreen() {
           <RNView
             style={[
               styles.libraryContent,
-              { paddingBottom: insets.bottom + 80 },
+              { paddingBottom: insets.bottom + 24 },
             ]}
           >
             <RNView style={styles.libraryHeader}>
@@ -597,7 +680,7 @@ export default function UserProfileScreen() {
           </RNView>
         ) : (
           <RNView
-            style={[styles.emptyContent, { paddingBottom: insets.bottom + 80 }]}
+            style={[styles.emptyContent, { paddingBottom: insets.bottom + 24 }]}
           >
             <Text style={[styles.emptyText, { color: theme.secondary }]}>
               {activeTab} content coming soon.

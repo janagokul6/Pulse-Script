@@ -70,6 +70,7 @@ export default function ProfileScreen() {
       (user as any)?.specialization || "Chief of Cardiovascular Surgery",
     registrationNumber: (user as any)?.registrationNumber || "MED-7821-UK",
     experienceYears: (user as any)?.experienceYears?.toString() || "22",
+    patientsTreated: (user as any)?.patientsTreated?.toString() || "5000+",
     hospital: (user as any)?.hospital || "Royal Academy of Medicine",
     education: (user as any)?.education || "Harvard Medical School",
     researchInterests:
@@ -210,63 +211,75 @@ export default function ProfileScreen() {
           <RNView
             style={[
               styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
+              { backgroundColor: theme.background, borderColor: theme.border },
             ]}
           >
-            <Text style={styles.statLabel}>SUCCESS</Text>
+            <Text style={styles.statLabel}>EXPERIENCE</Text>
             <RNView style={styles.statValueRow}>
-              <Text style={styles.statValueAccent}>99.4%</Text>
+              <Text style={[styles.statValueDark, { color: theme.text }]}>
+                {profileData.experienceYears}
+              </Text>
+              <Text
+                style={[
+                  styles.statValueDark,
+                  { color: theme.text, fontSize: 14 },
+                ]}
+              >
+                yrs
+              </Text>
+            </RNView>
+            <Text style={[styles.statHelper, { color: theme.secondary }]}>
+              Clinical Practice
+            </Text>
+          </RNView>
+
+          <RNView
+            style={[
+              styles.statBox,
+              { backgroundColor: theme.background, borderColor: theme.border },
+            ]}
+          >
+            <Text style={styles.statLabel}>PATIENTS</Text>
+            <RNView style={styles.statValueRow}>
+              <Text style={[styles.statValueDark, { color: theme.text }]}>
+                {profileData.patientsTreated}
+              </Text>
               <SymbolView
                 name={{
-                  ios: "medal.fill",
-                  android: "military_tech",
-                  web: "military_tech",
+                  ios: "person.crop.circle.badge.checkmark",
+                  android: "how_to_reg",
+                  web: "how_to_reg",
+                }}
+                tintColor={theme.tint}
+                size={16}
+              />
+            </RNView>
+            <Text style={[styles.statHelper, { color: theme.secondary }]}>
+              Treated
+            </Text>
+          </RNView>
+
+          <RNView
+            style={[
+              styles.statBox,
+              { backgroundColor: theme.background, borderColor: "#d4af3733" },
+            ]}
+          >
+            <Text style={styles.statLabel}>CASES</Text>
+            <RNView style={styles.statValueRow}>
+              <Text style={styles.statValueAccent}>24</Text>
+              <SymbolView
+                name={{
+                  ios: "doc.text.fill",
+                  android: "article",
+                  web: "article",
                 }}
                 tintColor="#d4af37"
-                size={18}
+                size={16}
               />
             </RNView>
             <Text style={[styles.statHelper, { color: theme.tint }]}>
-              +1.2% year-avg
-            </Text>
-          </RNView>
-
-          <RNView
-            style={[
-              styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
-            ]}
-          >
-            <Text style={styles.statLabel}>LECTURES</Text>
-            <RNView style={styles.statValueRow}>
-              <Text style={[styles.statValueDark, { color: theme.text }]}>
-                412
-              </Text>
-            </RNView>
-            <Text style={[styles.statHelper, { color: theme.tint }]}>
-              Top 5% Contributor
-            </Text>
-          </RNView>
-
-          <RNView
-            style={[
-              styles.statBox,
-              { backgroundColor: theme.background, borderColor: "#d4af3733" },
-            ]}
-          >
-            <Text style={styles.statLabel}>RATING</Text>
-            <RNView style={styles.statValueRow}>
-              <Text style={[styles.statValueDark, { color: theme.text }]}>
-                5.0
-              </Text>
-              <SymbolView
-                name={{ ios: "star.fill", android: "star", web: "star" }}
-                tintColor="#d4af37"
-                size={18}
-              />
-            </RNView>
-            <Text style={[styles.statHelper, { color: theme.tint }]}>
-              Elite Fellow
+              Published
             </Text>
           </RNView>
         </RNView>
@@ -307,9 +320,7 @@ export default function ProfileScreen() {
 
         {/* Content Area */}
         {activeTab === "About" ? (
-          <RNView
-            style={[styles.aboutContent, { paddingBottom: insets.bottom + 80 }]}
-          >
+          <RNView style={[styles.aboutContent, { paddingBottom: 24 }]}>
             <RNView style={styles.aboutHeader}>
               <Text style={[styles.aboutTitle, { color: theme.text }]}>
                 About
@@ -755,12 +766,7 @@ export default function ProfileScreen() {
             </RNView>
           </RNView>
         ) : activeTab === "Library" ? (
-          <RNView
-            style={[
-              styles.libraryContent,
-              { paddingBottom: insets.bottom + 80 },
-            ]}
-          >
+          <RNView style={[styles.libraryContent, { paddingBottom: 24 }]}>
             <RNView style={styles.libraryHeader}>
               <Text style={[styles.libraryTitle, { color: theme.text }]}>
                 Published Case Studies
@@ -881,9 +887,7 @@ export default function ProfileScreen() {
             ))}
           </RNView>
         ) : (
-          <RNView
-            style={[styles.emptyContent, { paddingBottom: insets.bottom + 80 }]}
-          >
+          <RNView style={[styles.emptyContent, { paddingBottom: 24 }]}>
             <Text style={[styles.emptyText, { color: theme.secondary }]}>
               {activeTab} content coming soon.
             </Text>

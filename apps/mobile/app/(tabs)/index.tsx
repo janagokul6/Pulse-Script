@@ -84,8 +84,8 @@ export default function FeedScreen() {
       return res;
     },
     getNextPageParam: (lastPage) => {
-      const totalFetched = lastPage.page * lastPage.limit;
-      return totalFetched < lastPage.total ? lastPage.page + 1 : undefined;
+      // If the number of posts fetched is less than limit, we've hit the end of the DB
+      return lastPage.posts.length === lastPage.limit ? lastPage.page + 1 : undefined;
     },
     initialPageParam: 1,
   });
@@ -131,7 +131,7 @@ export default function FeedScreen() {
         data={posts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <PostCard post={item} />}
-        contentContainerStyle={[styles.list, { paddingBottom: 120 }]}
+        contentContainerStyle={[styles.list, { paddingBottom: 24 }]}
         onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
         onEndReachedThreshold={0.5}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={() => refetch()} tintColor={theme.tint} />}
@@ -156,6 +156,12 @@ export default function FeedScreen() {
           isFetchingNextPage ? (
             <RNView style={{ paddingVertical: 16 }}>
               <PostSkeleton />
+            </RNView>
+          ) : !hasNextPage && posts.length > 0 && posts !== MOCK_POSTS ? (
+            <RNView style={{ paddingVertical: 32, alignItems: 'center' }}>
+              <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }} tintColor={theme.tint} size={32} style={{ marginBottom: 12 }} />
+              <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>You're all caught up</Text>
+              <Text style={{ color: theme.secondary, fontSize: 14, marginTop: 4 }}>You've seen all cases for this category.</Text>
             </RNView>
           ) : null
         }

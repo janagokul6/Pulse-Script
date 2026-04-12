@@ -117,10 +117,23 @@ export default function PostDetailScreen() {
   const post = fetchedPost;
   const toggleBookmark = () => bookmarkMutation.mutate(!post.bookmarked);
 
+  const handleFollowAndRedirect = async () => {
+    if (!id.startsWith('mock-')) {
+      try {
+        await api.post(`/users/${post.author.id}/follow`);
+        queryClient.invalidateQueries({ queryKey: ['user', post.author.id] });
+      } catch (e) {
+        console.error('Follow failed', e);
+      }
+    }
+    router.push(`/user/${post.author.id}`);
+  };
+
   // Parse fields for formatted display
   const titleStr = post.title || (post.caseSummary.split('\n')[0].length < 60 ? post.caseSummary.split('\n')[0] : 'Clinical Case Study');
   const decisionsList = post.clinicalDecisions ? post.clinicalDecisions.split('\n').filter(Boolean) : [];
   const lessonsList = post.keyLessons ? post.keyLessons.split('\n').filter(Boolean) : [];
+  const authorFirstName = post.author.name.replace(/^Dr\.?\s+/i, '').split(' ')[0];
 
   return (
     <RNView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -237,9 +250,9 @@ export default function PostDetailScreen() {
 
       {/* Sticky Bottom Interaction Footer */}
       <RNView style={[styles.footer, { paddingBottom: insets.bottom || 16, backgroundColor: theme.background, borderTopColor: theme.tint + '1a' }]}>
-        <TouchableOpacity style={[styles.followBtn, { backgroundColor: theme.tint }]}>
+        <TouchableOpacity style={[styles.followBtn, { backgroundColor: theme.tint }]} onPress={handleFollowAndRedirect}>
           <SymbolView name={{ ios: 'person.badge.plus', android: 'person_add', web: 'person_add' }} tintColor="#fff" size={20} />
-          <Text style={styles.followBtnText}>Follow Doctor</Text>
+          <Text style={styles.followBtnText}>Follow {authorFirstName}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.footerActionBtn, { backgroundColor: theme.tint + '1a' }]} onPress={() => setCommentsVisible(true)}>
           <SymbolView name={{ ios: 'bubble.right', android: 'chat_bubble', web: 'chat_bubble' }} tintColor={theme.tint} size={22} />
